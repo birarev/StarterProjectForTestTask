@@ -9,4 +9,14 @@ public static class EventsProvider
             ScreenId = screenId;
         }
     }
+
+    public class LoadSceneEvent
+    {
+        public readonly string SceneName;
+
+        public LoadSceneEvent(string sceneName)
+        {
+            SceneName = sceneName;
+        }
+    }
 }

@@ -149,6 +149,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a49e888c2ebd44e47930c928f7e23801, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CoreSceneInstaller
+  _initialScreenId: GameHud
 --- !u!114 &351774380
 MonoBehaviour:
   m_ObjectHideFlags: 0
