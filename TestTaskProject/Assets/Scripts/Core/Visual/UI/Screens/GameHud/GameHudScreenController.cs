@@ -17,15 +17,45 @@ public class GameHudScreenController : ScreenController
         base.Open();
 
         _gameHudView.BackButton.onClick.AddListener(OnBackClicked);
+
+        _gameHudView.Game.StateChanged += OnStateChanged;
+        _gameHudView.Game.GameEnded += OnGameEnded;
+
+        _gameHudView.Target.Initialize(_gameHudView.Game);
+
+        _gameHudView.HideResult();
+        _gameHudView.Game.StartGame();
     }
 
     public override void Dispose()
     {
         _gameHudView.BackButton.onClick.RemoveListener(OnBackClicked);
+
+        _gameHudView.Game.StateChanged -= OnStateChanged;
+        _gameHudView.Game.GameEnded -= OnGameEnded;
+    }
+
+    private void OnStateChanged(
+        int score,
+        int lives,
+        float timeLeft)
+    {
+        _gameHudView.UpdateScore(score, 10);
+        _gameHudView.UpdateLives(lives);
+        _gameHudView.UpdateTime(timeLeft);
+    }
+
+    private void OnGameEnded(bool isWin)
+    {
+        UnityEngine.Debug.Log("CONTROLLER RECEIVED GAME END");
+
+        _gameHudView.ShowResult(isWin);
     }
 
     private void OnBackClicked()
     {
-        _eventManager.Publish(new LoadSceneEvent("FirstScene"));
+        _eventManager.Publish(
+            new LoadSceneEvent("FirstScene")
+        );
     }
 }
