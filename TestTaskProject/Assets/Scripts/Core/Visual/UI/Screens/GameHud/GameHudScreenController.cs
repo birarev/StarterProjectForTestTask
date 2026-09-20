@@ -17,6 +17,7 @@ public class GameHudScreenController : ScreenController
         base.Open();
 
         _gameHudView.BackButton.onClick.AddListener(OnBackClicked);
+        _gameHudView.RestartButton.onClick.AddListener(OnRestartClicked);
 
         _gameHudView.Game.StateChanged += OnStateChanged;
         _gameHudView.Game.GameEnded += OnGameEnded;
@@ -30,9 +31,16 @@ public class GameHudScreenController : ScreenController
     public override void Dispose()
     {
         _gameHudView.BackButton.onClick.RemoveListener(OnBackClicked);
+        _gameHudView.RestartButton.onClick.RemoveListener(OnRestartClicked);
 
         _gameHudView.Game.StateChanged -= OnStateChanged;
         _gameHudView.Game.GameEnded -= OnGameEnded;
+    }
+
+    private void OnRestartClicked()
+    {
+        _gameHudView.HideResult();
+        _gameHudView.Game.StartGame();
     }
 
     private void OnStateChanged(

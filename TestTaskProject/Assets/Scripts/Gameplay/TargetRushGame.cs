@@ -10,6 +10,8 @@ public class TargetRushGame : MonoBehaviour
     public event Action<int, int, float> StateChanged;
     public event Action<bool> GameEnded;
 
+    public bool IsGameOver => _isGameOver;
+
     private int _score;
     private int _lives;
     private float _timeLeft;

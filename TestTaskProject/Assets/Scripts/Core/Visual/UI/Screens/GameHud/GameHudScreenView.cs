@@ -5,6 +5,7 @@ using UnityEngine.UI;
 public class GameHudScreenView : ScreenView
 {
     public Button BackButton => _backButton;
+    public Button RestartButton => _restartButton;
     public TargetRushTarget Target => _target;
     public TargetRushGame Game => _game;
 
@@ -13,6 +14,7 @@ public class GameHudScreenView : ScreenView
     public TMP_Text TimeText => _timeText;
 
     [SerializeField] private Button _backButton;
+    [SerializeField] private Button _restartButton;
     [SerializeField] private TargetRushTarget _target;
     [SerializeField] private TargetRushGame _game;
 
@@ -44,6 +46,8 @@ public class GameHudScreenView : ScreenView
     public void HideResult()
     {
         _resultText.gameObject.SetActive(false);
+        _restartButton.gameObject.SetActive(false);
+        _target.gameObject.SetActive(true);
     }
 
     public void ShowResult(bool isWin)
@@ -53,11 +57,7 @@ public class GameHudScreenView : ScreenView
             : "YOU LOSE";
 
         _resultText.gameObject.SetActive(true);
-
-        Debug.Log(
-            $"RESULT SHOWN: {_resultText.text}, " +
-            $"activeSelf={_resultText.gameObject.activeSelf}, " +
-            $"activeInHierarchy={_resultText.gameObject.activeInHierarchy}"
-        );
+        _restartButton.gameObject.SetActive(true);
+        _target.gameObject.SetActive(false);
     }
 }
