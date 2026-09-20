@@ -1,16 +1,25 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 public class TargetRushTarget : MonoBehaviour
 {
     [SerializeField] private Button _button;
     [SerializeField] private RectTransform _movementArea;
     [SerializeField] private Image _targetImage;
+    [SerializeField] private Sprite _greenTargetSprite;
+    [SerializeField] private Sprite _redTargetSprite;
     [SerializeField] private TMP_Text _targetText;
 
-    [SerializeField] private float _changeInterval = 1.5f;
+    [SerializeField] private float _startChangeInterval = 1.5f;
+    [SerializeField] private float _minimumChangeInterval = 0.8f;
     [SerializeField] private float _dangerousChance = 0.35f;
+
+    public event Action CorrectClicked;
+    public event Action WrongClicked;
+    public event Action GreenMissed;
 
     private TargetRushGame _game;
     private RectTransform _rectTransform;
@@ -45,10 +54,11 @@ public class TargetRushTarget : MonoBehaviour
 
         if (_changeTimer <= 0f)
         {
-            // Green target disappeared before the player clicked it.
+            // Missing a green target costs one life.
             if (!_isDangerous && !_currentTargetWasClicked)
             {
                 _game.LoseLife();
+                GreenMissed?.Invoke();
 
                 if (_game.IsGameOver)
                     return;
@@ -63,7 +73,7 @@ public class TargetRushTarget : MonoBehaviour
         if (_game == null || _game.IsGameOver)
             return;
 
-        // Do not allow several clicks on the same target.
+        // Prevent multiple clicks on the same target.
         if (_currentTargetWasClicked)
             return;
 
@@ -71,19 +81,18 @@ public class TargetRushTarget : MonoBehaviour
 
         if (_isDangerous)
         {
-            // Red target = mistake.
             _game.LoseLife();
+            WrongClicked?.Invoke();
         }
         else
         {
-            // Green target = correct reaction.
             _game.AddScore();
+            CorrectClicked?.Invoke();
         }
 
         if (_game.IsGameOver)
             return;
 
-        // After a click, immediately show the next target.
         ShowNextTarget();
     }
 
@@ -93,7 +102,7 @@ public class TargetRushTarget : MonoBehaviour
 
         _isDangerous = Random.value < _dangerousChance;
         _currentTargetWasClicked = false;
-        _changeTimer = _changeInterval;
+        _changeTimer = GetCurrentChangeInterval();
 
         UpdateAppearance();
     }
@@ -119,20 +128,33 @@ public class TargetRushTarget : MonoBehaviour
         _rectTransform.anchoredPosition = new Vector2(x, y);
     }
 
+    private float GetCurrentChangeInterval()
+    {
+        if (_game == null)
+            return _startChangeInterval;
+
+        float progress = Mathf.Clamp01(_game.Score / 10f);
+
+        return Mathf.Lerp(
+            _startChangeInterval,
+            _minimumChangeInterval,
+            progress);
+    }
+
     private void UpdateAppearance()
     {
         if (_targetImage != null)
         {
-            _targetImage.color = _isDangerous
-                ? Color.red
-                : Color.green;
+            _targetImage.sprite = _isDangerous
+                ? _redTargetSprite
+                : _greenTargetSprite;
+
+            _targetImage.color = Color.white;
         }
 
         if (_targetText != null)
         {
-            _targetText.text = _isDangerous
-                ? "DON'T!"
-                : "CLICK!";
+            _targetText.text = string.Empty;
         }
     }
 

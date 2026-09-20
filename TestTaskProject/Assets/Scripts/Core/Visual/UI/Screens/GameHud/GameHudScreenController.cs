@@ -1,3 +1,4 @@
+using UnityEngine;
 using static EventsProvider;
 
 public class GameHudScreenController : ScreenController
@@ -22,6 +23,10 @@ public class GameHudScreenController : ScreenController
         _gameHudView.Game.StateChanged += OnStateChanged;
         _gameHudView.Game.GameEnded += OnGameEnded;
 
+        _gameHudView.Target.CorrectClicked += OnCorrectClicked;
+        _gameHudView.Target.WrongClicked += OnWrongClicked;
+        _gameHudView.Target.GreenMissed += OnGreenMissed;
+
         _gameHudView.Target.Initialize(_gameHudView.Game);
 
         _gameHudView.HideResult();
@@ -35,35 +40,54 @@ public class GameHudScreenController : ScreenController
 
         _gameHudView.Game.StateChanged -= OnStateChanged;
         _gameHudView.Game.GameEnded -= OnGameEnded;
+
+        _gameHudView.Target.CorrectClicked -= OnCorrectClicked;
+        _gameHudView.Target.WrongClicked -= OnWrongClicked;
+        _gameHudView.Target.GreenMissed -= OnGreenMissed;
+    }
+
+    private void OnStateChanged(
+        int score,
+        int lives,
+        float timeLeft,
+        int combo)
+    {
+        _gameHudView.UpdateScore(score, 10);
+        _gameHudView.UpdateLives(lives);
+        _gameHudView.UpdateTime(timeLeft);
+        _gameHudView.UpdateCombo(combo);
+    }
+
+    private void OnGameEnded(bool isWin)
+    {
+        _gameHudView.ShowResult(isWin);
     }
 
     private void OnRestartClicked()
     {
         _gameHudView.HideResult();
         _gameHudView.Game.StartGame();
-    }
-
-    private void OnStateChanged(
-        int score,
-        int lives,
-        float timeLeft)
-    {
-        _gameHudView.UpdateScore(score, 10);
-        _gameHudView.UpdateLives(lives);
-        _gameHudView.UpdateTime(timeLeft);
-    }
-
-    private void OnGameEnded(bool isWin)
-    {
-        UnityEngine.Debug.Log("CONTROLLER RECEIVED GAME END");
-
-        _gameHudView.ShowResult(isWin);
+        _gameHudView.Target.Initialize(_gameHudView.Game);
     }
 
     private void OnBackClicked()
     {
         _eventManager.Publish(
-            new LoadSceneEvent("FirstScene")
-        );
+            new LoadSceneEvent("FirstScene"));
+    }
+
+    private void OnCorrectClicked()
+    {
+        _gameHudView.ShowFeedback("+1", Color.green);
+    }
+
+    private void OnWrongClicked()
+    {
+        _gameHudView.ShowFeedback("WRONG!", Color.red);
+    }
+
+    private void OnGreenMissed()
+    {
+        _gameHudView.ShowFeedback("MISS!", Color.red);
     }
 }

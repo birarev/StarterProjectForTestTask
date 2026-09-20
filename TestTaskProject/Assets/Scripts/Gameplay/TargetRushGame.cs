@@ -7,15 +7,17 @@ public class TargetRushGame : MonoBehaviour
     [SerializeField] private int _startLives = 3;
     [SerializeField] private float _gameDuration = 30f;
 
-    public event Action<int, int, float> StateChanged;
+    public event Action<int, int, float, int> StateChanged;
     public event Action<bool> GameEnded;
 
     public bool IsGameOver => _isGameOver;
+    public int Score => _score;
+    public int Combo => _combo;
 
     private int _score;
     private int _lives;
+    private int _combo;
     private float _timeLeft;
-
     private bool _isGameOver;
     private bool _isRunning;
 
@@ -23,16 +25,12 @@ public class TargetRushGame : MonoBehaviour
     {
         _score = 0;
         _lives = _startLives;
+        _combo = 0;
         _timeLeft = _gameDuration;
-
         _isGameOver = false;
         _isRunning = true;
 
         NotifyStateChanged();
-
-        Debug.Log(
-            $"Game started. Score: {_score}, Lives: {_lives}, Time: {_timeLeft}"
-        );
     }
 
     private void Update()
@@ -45,10 +43,8 @@ public class TargetRushGame : MonoBehaviour
         if (_timeLeft <= 0f)
         {
             _timeLeft = 0f;
-
             NotifyStateChanged();
             LoseGame();
-
             return;
         }
 
@@ -61,15 +57,12 @@ public class TargetRushGame : MonoBehaviour
             return;
 
         _score++;
-
-        Debug.Log($"Score: {_score}");
+        _combo++;
 
         NotifyStateChanged();
 
         if (_score >= _targetScore)
-        {
             WinGame();
-        }
     }
 
     public void LoseLife()
@@ -78,23 +71,18 @@ public class TargetRushGame : MonoBehaviour
             return;
 
         _lives--;
-
-        Debug.Log($"Lives: {_lives}");
+        _combo = 0;
 
         NotifyStateChanged();
 
         if (_lives <= 0)
-        {
             LoseGame();
-        }
     }
 
     private void WinGame()
     {
         _isGameOver = true;
         _isRunning = false;
-
-        Debug.Log("YOU WIN");
 
         GameEnded?.Invoke(true);
     }
@@ -104,17 +92,11 @@ public class TargetRushGame : MonoBehaviour
         _isGameOver = true;
         _isRunning = false;
 
-        Debug.Log("YOU LOSE");
-
         GameEnded?.Invoke(false);
     }
 
     private void NotifyStateChanged()
     {
-        StateChanged?.Invoke(
-            _score,
-            _lives,
-            _timeLeft
-        );
+        StateChanged?.Invoke(_score, _lives, _timeLeft, _combo);
     }
 }
